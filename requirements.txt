@@ -3,14 +3,9 @@ requests>=2.25.1
 beautifulsoup4>=4.9.3
 yfinance>=0.1.63
 
-# Export functionality
+# GUI and export functionality
 openpyxl>=3.0.7
+tkinter>=8.6; sys_platform != "win32"
 
-# Development dependencies (optional)
-pytest>=6.2.4
-pytest-cov>=2.12.1
-black>=21.6b0
-flake8>=3.9.2
-
-# Note: tkinter is typically included with Python installations
-# If not available, install python-tk (on Ubuntu/Debian) or python3-tkinter 
+# Note: On Windows, tkinter is typically included with Python
+# On Linux/Mac, you may need to install: sudo apt-get install python3-tk (Ubuntu/Debian) 

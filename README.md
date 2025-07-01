@@ -1,4 +1,4 @@
-# FinScraper - Comprehensive Financial Data Scraper
+# FinPull - Comprehensive Financial Data Scraper
 
 A powerful, cross-platform financial data scraping tool that fetches comprehensive financial data from multiple sources with fallback mechanisms.
 
@@ -15,8 +15,8 @@ A powerful, cross-platform financial data scraping tool that fetches comprehensi
 
 ### From Source
 ```bash
-git clone <repository-url>
-cd FinScraper
+git clone https://github.com/Lavarite/FinPull
+cd FinPull
 pip install -r requirements.txt
 ```
 
@@ -29,17 +29,17 @@ pip install -e .
 
 ### GUI Mode (Default)
 ```bash
-python -m finscraper
+python -m finpull
 ```
 
 ### CLI Mode
 ```bash
-python -m finscraper --cli
+python -m finpull --cli
 ```
 
 ### As a Library
 ```python
-from finscraper import FinancialDataScraper
+from finpull import FinancialDataScraper
 
 scraper = FinancialDataScraper()
 scraper.add_ticker("AAPL")
@@ -61,13 +61,11 @@ data = scraper.get_all_data()
 ## Project Structure
 
 ```
-FinScraper/
-├── src/finscraper/           # Main package
+FinPull/
+├── src/finpull/           # Main package
 │   ├── core/                 # Core functionality
 │   ├── interfaces/           # User interfaces
 │   └── utils/               # Utilities
-├── examples/                # Usage examples
-├── tests/                   # Test suite
 └── docs/                    # Documentation
 ```
 
@@ -75,7 +73,7 @@ FinScraper/
 
 ### Adding and Managing Tickers
 ```python
-from finscraper import FinancialDataScraper
+from finpull import FinancialDataScraper
 
 scraper = FinancialDataScraper()
 
@@ -94,7 +92,7 @@ print(f"Data exported to {filename}")
 
 ### Batch Processing
 ```python
-from finscraper.utils.batch import batch_fetch_tickers
+from finpull.utils.batch import batch_fetch_tickers
 
 tickers = ["AAPL", "GOOGL", "MSFT", "TSLA"]
 results = batch_fetch_tickers(tickers)
@@ -116,7 +114,7 @@ for data in results:
 
 ### Example Session
 ```bash
-$ python -m finscraper --cli
+$ python -m finpull --cli
 Financial Data Scraper CLI
 Commands: add, remove, list, refresh, export, clear, quit
 
@@ -147,8 +145,8 @@ let data = pyodide_financial_scraper.get_data();
 ## Configuration
 
 ### Environment Variables
-- `FINSCRAPER_STORAGE_FILE` - Custom storage file path
-- `FINSCRAPER_RATE_LIMIT` - Rate limit delay in seconds
+- `FINPULL_STORAGE_FILE` - Custom storage file path
+- `FINPULL_RATE_LIMIT` - Rate limit delay in seconds
 
 ### Data Sources Priority
 1. Finviz (primary)
@@ -168,8 +166,7 @@ The application includes comprehensive error handling:
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+4. Submit a pull request
 
 ## License
 

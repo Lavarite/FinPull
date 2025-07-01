@@ -1,11 +1,11 @@
-# FinScraper Installation Guide
+# FinPull Installation Guide
 
 ## Quick Start
 
 ### 1. Clone or Download
 ```bash
 git clone <repository-url>
-cd FinScraper
+cd FinPull
 ```
 
 ### 2. Install Dependencies (Optional)
@@ -14,41 +14,29 @@ For full functionality, install the optional dependencies:
 pip install -r requirements.txt
 ```
 
-**Note**: FinScraper works without external dependencies using mock data fallback.
+**Note**: FinPull works without external dependencies using mock data fallback.
 
 ### 3. Run the Application
 
 #### GUI Mode (Default)
 ```bash
-PYTHONPATH=src python3 -m finscraper
+PYTHONPATH=src python3 -m finpull
 ```
 
 #### CLI Mode
 ```bash
-PYTHONPATH=src python3 -m finscraper --cli
+PYTHONPATH=src python3 -m finpull --cli
 ```
 
 #### As a Python Library
 ```python
 import sys
 sys.path.insert(0, 'src')
-from finscraper import FinancialDataScraper
+from finpull import FinancialDataScraper
 
 scraper = FinancialDataScraper()
 scraper.add_ticker("AAPL")
 data = scraper.get_all_data()
-```
-
-### 4. Run Examples
-```bash
-python3 examples/basic_usage.py
-python3 examples/batch_processing.py
-python3 examples/api_usage.py
-```
-
-### 5. Run Tests
-```bash
-python3 tests/test_basic.py
 ```
 
 ## Dependencies
@@ -95,7 +83,7 @@ If GUI doesn't work:
 ### Missing Dependencies
 Run the dependency check:
 ```bash
-PYTHONPATH=src python3 -c "from finscraper.utils.compatibility import print_dependency_status; print_dependency_status()"
+PYTHONPATH=src python3 -c "from finpull.utils.compatibility import print_dependency_status; print_dependency_status()"
 ```
 
 ## Platform Support
@@ -108,5 +96,4 @@ PYTHONPATH=src python3 -c "from finscraper.utils.compatibility import print_depe
 ## Next Steps
 
 1. Read the [README.md](README.md) for usage instructions
-2. Check out the [examples/](examples/) directory
-3. Run the demo: `python3 run_demo.py` 
+2. Run the demo: `python3 run_demo.py` 

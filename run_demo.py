@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simple demo script to test FinScraper functionality
+Simple demo script to test FinPull functionality
 """
 
 import sys
@@ -10,15 +10,15 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 def main():
-    print("=== FinScraper Demo ===\n")
+    print("=== FinPull Demo ===\n")
     
     try:
         # Test basic import
-        from finscraper import FinancialDataScraper
+        from finpull import FinancialDataScraper
         print("✓ Successfully imported FinancialDataScraper")
         
         # Test compatibility
-        from finscraper.utils.compatibility import get_available_features
+        from finpull.utils.compatibility import get_available_features
         features = get_available_features()
         print("✓ Available features:")
         for feature, available in features.items():

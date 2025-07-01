@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Setup script for FinScraper - Financial Data Scraper
+Setup script for FinPull - Financial Data Scraper
 """
 
 from setuptools import setup, find_packages
@@ -19,7 +19,7 @@ setup(
     description="Financial data scraper with beautiful CLI interface",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/finscraper",
+    url="https://github.com/Lavarite/FinPull",
     package_dir={"": "src"},
     packages=find_packages(where="src"),
     classifiers=[
@@ -43,19 +43,11 @@ setup(
         "requests>=2.25.1",
         "beautifulsoup4>=4.9.3",
         "yfinance>=0.1.63",
-        "openpyxl>=3.0.7",
+        "openpyxl>=3.0.7"
     ],
-    extras_require={
-        "dev": [
-            "pytest>=6.2.4",
-            "pytest-cov>=2.12.1",
-            "black>=21.6b0",
-            "flake8>=3.9.2",
-        ],
-    },
     entry_points={
         "console_scripts": [
-            "finscraper=finscraper.__main__:main",
+            "finpull=finpull.__main__:main",
         ],
     },
     include_package_data=True,
