@@ -33,18 +33,11 @@ MANIFEST
 pip-log.txt
 pip-delete-this-directory.txt
 
-# Unit test / coverage reports
+# Coverage reports
 htmlcov/
-.tox/
-.nox/
 .coverage
 .coverage.*
-.cache
-nosetests.xml
-coverage.xml
 *.cover
-.hypothesis/
-.pytest_cache/
 
 # Translations
 *.mo
@@ -108,7 +101,8 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
-# FinScraper specific
+# FinPull specific
+run_demo.py
 financial_data.json
 financial_data.json.backup
 financial_export_*.json

@@ -1,5 +1,5 @@
 """
-Utility modules for FinScraper
+Utility modules for FinPull
 """
 
 # Only import compatibility to avoid circular imports
