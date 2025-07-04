@@ -1,4 +1,4 @@
-# FinPull - Professional Financial Data Scraper
+# FinPull - Financial Data Scraper
 
 [![PyPI - finpull-core](https://img.shields.io/pypi/v/finpull-core?label=finpull-core&color=blue)](https://pypi.org/project/finpull-core/)
 [![PyPI - finpull](https://img.shields.io/pypi/v/finpull?label=finpull&color=green)](https://pypi.org/project/finpull/)
