@@ -5,7 +5,7 @@
 [![Python](https://img.shields.io/pypi/pyversions/finpull)](https://pypi.org/project/finpull/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A professional-grade financial data scraper that provides comprehensive stock market data through multiple interfaces. Built with enterprise-level architecture featuring separate core and full packages for different use cases.
+A financial data scraper that provides comprehensive stock market data through multiple interfaces.
 
 ## 🚀 Quick Start
 
