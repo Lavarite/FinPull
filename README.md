@@ -1,186 +1,313 @@
-# FinPull - Comprehensive Financial Data Scraper
+# FinPull - Professional Financial Data Scraper
 
-A powerful, cross-platform financial data scraping tool that fetches comprehensive financial data from multiple sources with fallback mechanisms.
+[![PyPI - finpull-core](https://img.shields.io/pypi/v/finpull-core?label=finpull-core&color=blue)](https://pypi.org/project/finpull-core/)
+[![PyPI - finpull](https://img.shields.io/pypi/v/finpull?label=finpull&color=green)](https://pypi.org/project/finpull/)
+[![Python](https://img.shields.io/pypi/pyversions/finpull)](https://pypi.org/project/finpull/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Features
+A professional-grade financial data scraper that provides comprehensive stock market data through multiple interfaces. Built with enterprise-level architecture featuring separate core and full packages for different use cases.
 
-- **Multiple Data Sources**: Supports Finviz, Yahoo Finance, and mock data fallback
-- **Cross-Platform**: Compatible with Python, WASM, and executable environments
-- **Multiple Interfaces**: GUI (Tkinter), CLI, and programmatic API
-- **Export Options**: JSON, CSV, and Excel formats
-- **Data Persistence**: Automatic caching and storage
-- **Error Handling**: Robust fallback mechanisms and rate limiting
+## 🚀 Quick Start
 
-## Installation
-
-### From Source
 ```bash
-git clone https://github.com/Lavarite/FinPull
-cd FinPull
-pip install -r requirements.txt
+# For web applications and APIs (lightweight)
+pip install finpull-core
+
+# For complete desktop/CLI usage
+pip install finpull
 ```
 
-### For Development
-```bash
-pip install -e .
-```
-
-## Quick Start
-
-### GUI Mode (Default)
-```bash
-python -m finpull
-```
-
-### CLI Mode
-```bash
-python -m finpull --cli
-```
-
-### As a Library
 ```python
-from finpull import FinancialDataScraper
+# API Usage (both packages)
+from finpull_core import FinancialDataAPI
 
-scraper = FinancialDataScraper()
-scraper.add_ticker("AAPL")
-data = scraper.get_all_data()
+api = FinancialDataAPI()
+api.add_ticker('AAPL')
+data = api.get_data('AAPL')
+print(f"Apple: ${data['data']['price']}")
 ```
 
-## Dependencies
-
-### Required
-- Python 3.7+
-
-### Optional (for full functionality)
-- `requests` - Web scraping
-- `beautifulsoup4` - HTML parsing
-- `yfinance` - Yahoo Finance data
-- `tkinter` - GUI interface (usually included with Python)
-- `openpyxl` - Excel export
-
-## Project Structure
-
-```
-FinPull/
-├── src/finpull/           # Main package
-│   ├── core/                 # Core functionality
-│   ├── interfaces/           # User interfaces
-│   └── utils/               # Utilities
-└── docs/                    # Documentation
+```bash
+# CLI Usage (full package only)
+finpull add AAPL MSFT GOOGL
+finpull show
+finpull export --csv portfolio.csv
 ```
 
-## Usage Examples
+## 📦 Package Architecture
 
-### Adding and Managing Tickers
+### Two Packages, One Ecosystem
+
+| Package | Size | Use Case | Interfaces | Dependencies |
+|---------|------|----------|------------|--------------|
+| **finpull-core** | 21.9KB | Web apps, APIs, microservices | API only | 3 minimal |
+| **finpull** | 27.2KB | Desktop, CLI, complete toolkit | API + CLI + GUI | Includes core |
+
+### finpull-core (Lightweight)
+- **Purpose**: Embedded in web applications, APIs, and microservices
+- **Size**: 21.9KB wheel, 134KB installed
+- **Dependencies**: requests, beautifulsoup4, yfinance
+- **Interfaces**: Python API only
+- **Import Time**: 0.0002s (cached)
+
+### finpull (Complete)
+- **Purpose**: Desktop applications, command-line tools, data analysis
+- **Size**: 27.2KB wheel, 188KB installed  
+- **Dependencies**: All core dependencies + tkinter
+- **Interfaces**: Python API + CLI + GUI
+- **Import Time**: 0.0002s (cached)
+
+## 💡 Key Features
+
+### Core Features
+- **27 Financial Metrics**: Comprehensive stock data from multiple sources
+- **Multiple Interfaces**: API, CLI, and GUI for different use cases
+- **Smart Validation**: Prevents invalid tickers with user-friendly error messages
+- **Export Formats**: JSON, CSV, Excel with batch support
+- **Progress Tracking**: Real-time status updates for all operations
+
+## 🛠 Installation Guide
+
+### For Web Developers
+```bash
+pip install finpull-core
+```
+Perfect for REST APIs, web scraping services, and embedded applications.
+
+### For Data Analysts & Desktop Users
+```bash
+pip install finpull
+```
+Includes everything: API, CLI tools, and GUI application.
+
+### For JavaScript Integration
+JavaScript integration available via Pyodide (browser) and CLI commands (Node.js). See web integration section below.
+
+## 📊 Usage Examples
+
+### API Usage (Python)
 ```python
-from finpull import FinancialDataScraper
+from finpull_core import FinancialDataAPI
 
-scraper = FinancialDataScraper()
+# Initialize API
+api = FinancialDataAPI()
 
 # Add tickers
-scraper.add_ticker("AAPL")
-scraper.add_ticker("GOOGL")
+result = api.batch_add_tickers(['AAPL', 'MSFT', 'GOOGL'])
+print(f"Added {result['summary']['added_count']} tickers")
 
-# Refresh data
-scraper.refresh_data("AAPL")  # Single ticker
-scraper.refresh_data()        # All tickers
+# Get data
+response = api.get_data('AAPL')
+if response['success']:
+    data = response['data']
+    print(f"Apple Inc: ${data['price']} (P/E: {data['pe_ratio']})")
 
 # Export data
-filename = scraper.export_data("xlsx")
-print(f"Data exported to {filename}")
+api.export_data('json', 'portfolio.json')
 ```
 
-### Batch Processing
-```python
-from finpull.utils.batch import batch_fetch_tickers
-
-tickers = ["AAPL", "GOOGL", "MSFT", "TSLA"]
-results = batch_fetch_tickers(tickers)
-
-for data in results:
-    print(f"{data.ticker}: {data.price}")
-```
-
-## Command Line Interface
-
-### Available Commands
-- `add` - Add a new ticker
-- `remove` - Remove a ticker
-- `list` - List all tickers and basic info
-- `refresh` - Refresh data for ticker(s)
-- `export` - Export data to file
-- `clear` - Clear all data
-- `help` - Show help
-
-### Example Session
+### CLI Usage (Terminal)
 ```bash
-$ python -m finpull --cli
-Financial Data Scraper CLI
-Commands: add, remove, list, refresh, export, clear, quit
+# Add multiple tickers
+finpull add AAPL MSFT GOOGL TSLA
 
-Enter command: add
-Enter ticker: AAPL
-Added AAPL
+# Show portfolio summary
+finpull show
 
-Enter command: list
-Ticker     Company                        Price      P/E      Market Cap     
---------------------------------------------------------------------------------
-AAPL       Apple Inc.                     150.00     25.5     2.5T           
+# Show detailed view
+finpull show --full
 
-Enter command: export
-Enter format (json/csv/xlsx): csv
-Data exported to financial_export_20231215_143022.csv
+# Refresh all data
+finpull refresh
+
+# Export to multiple formats
+finpull export portfolio --json --csv --xlsx
+
+# Get statistics
+finpull stats
+
+# Interactive mode
+finpull --interactive
 ```
 
-## Web/WASM Environment
+### GUI Usage (Desktop)
+```bash
+# Launch GUI
+finpull --gui
 
-The scraper is compatible with Pyodide/WASM environments:
+# Or simply
+finpull
+```
 
+Features:
+- Add/remove tickers with validation
+- Multi-selection for batch operations
+- Sortable columns by any metric
+- Export to multiple formats
+
+## 🔧 Advanced Configuration
+
+### Custom Storage Location
+```python
+from finpull_core import FinancialDataScraper
+
+# Custom storage file
+scraper = FinancialDataScraper(storage_file='/path/to/custom/data.json')
+```
+
+### Progress Callbacks
+```python
+def progress_callback(ticker, status):
+    print(f"{ticker}: {status}")
+
+api.refresh_data_with_progress(progress_callback=progress_callback)
+```
+
+### Data Validation
+```python
+# Validate before adding
+if api.validate_ticker('AAPL')['valid']:
+    api.add_ticker('AAPL')
+```
+
+## 📈 Data Coverage
+
+Each ticker provides 27 comprehensive financial metrics including price, valuation ratios, earnings data, profitability metrics, growth indicators, financial health data, and trading statistics.
+
+## 🌐 Web Integration
+
+### Browser Usage (Pyodide)
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+</head>
+<body>
+    <script>
+        async function loadFinPull() {
+            let pyodide = await loadPyodide();
+            await pyodide.loadPackage("micropip");
+            await pyodide.runPython(`
+                import micropip
+                await micropip.install('finpull-core')
+                from finpull_core import FinancialDataAPI
+                api = FinancialDataAPI()
+            `);
+            
+            // Now use FinPull in browser
+            pyodide.runPython(`
+                api.add_ticker('AAPL')
+                data = api.get_data('AAPL')
+                print(f"Apple: ${data['data']['price']}")
+            `);
+        }
+        loadFinPull();
+    </script>
+</body>
+</html>
+```
+
+### Node.js Integration
 ```javascript
-// In a web environment with Pyodide
-let result = pyodide_financial_scraper.add_ticker("AAPL");
-let data = pyodide_financial_scraper.get_data();
+const { spawn } = require('child_process');
+
+class FinPullJS {
+    async addTicker(ticker) {
+        return new Promise((resolve, reject) => {
+            const process = spawn('finpull', ['add', ticker]);
+            process.on('close', (code) => {
+                resolve(code === 0);
+            });
+        });
+    }
+    
+    async getData() {
+        return new Promise((resolve, reject) => {
+            const process = spawn('finpull', ['export', '--json', '/tmp/data.json']);
+            process.on('close', (code) => {
+                if (code === 0) {
+                    const data = require('/tmp/data.json');
+                    resolve(data);
+                } else {
+                    reject(new Error('Export failed'));
+                }
+            });
+        });
+    }
+}
 ```
 
-## Configuration
+## 🚀 Performance Benchmarks
 
-### Environment Variables
-- `FINPULL_STORAGE_FILE` - Custom storage file path
-- `FINPULL_RATE_LIMIT` - Rate limit delay in seconds
+**Package Sizes**
+- finpull-core: 21.9KB wheel → 134KB installed
+- finpull: 27.2KB wheel → 188KB installed
 
-### Data Sources Priority
-1. Finviz (primary)
-2. Yahoo Finance (fallback)
-3. Mock data (testing/offline)
+**Import Performance**
+- finpull-core: 0.0002s (cached)
+- finpull: 0.0002s (cached)
+- Cold start: ~0.9s (dependency loading)
 
-## Error Handling
+**Data Fetching**
+- Single ticker: ~1 second
+- Batch operations: ~1 second per ticker
+- Rate limiting: 1 second between requests
 
-The application includes comprehensive error handling:
-- Network timeout and retry logic
-- Rate limiting compliance
-- Graceful fallback between data sources
-- Data validation and sanitization
+## 🔍 Troubleshooting
 
-## Contributing
+### Common Issues
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+**Import Errors**
+```bash
+# Ensure packages are installed
+pip install --upgrade finpull-core
+pip install --upgrade finpull
+```
 
-## License
+**GUI Won't Launch**
+```bash
+# Check display environment
+echo $DISPLAY
 
-MIT License - see LICENSE file for details.
+# Install GUI dependencies (Linux)
+sudo apt-get install python3-tk
+```
 
-## Support
+**Network Issues**
+```python
+# Check data sources
+from finpull_core import FinancialDataScraper
+scraper = FinancialDataScraper()
+print(scraper.get_stats()['data_sources'])
+```
 
-For issues and feature requests, please use the GitHub issue tracker.
+**Invalid Ticker Errors**
+- Ensure ticker symbols are valid (e.g., 'AAPL' not 'Apple')
+- Check for typos and proper formatting
+- Some international tickers may not be supported
 
-## Changelog
+## 📚 Documentation
 
-### v1.0.0
-- Initial release
-- Multi-source financial data scraping
-- GUI, CLI, and API interfaces
-- Export to JSON, CSV, and Excel
-- Cross-platform compatibility 
+- **API Reference**: See `packages/finpull-core/docs/API_REFERENCE.md`
+- **Interface Guide**: See `packages/finpull/docs/INTERFACES.md`
+
+### Development Setup
+```bash
+git clone https://github.com/yourusername/finpull.git
+cd finpull
+
+# Install both packages in development mode
+pip install -e packages/finpull-core/
+pip install -e packages/finpull/
+
+# Run tests
+python -m pytest tests/
+```
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+
+---

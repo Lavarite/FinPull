@@ -35,9 +35,6 @@ class DataSourceManager:
             self.sources.append(self._fetch_from_finviz)
         if HAS_YFINANCE:
             self.sources.append(self._fetch_from_yahoo)
-        
-        # Add fallback data source (mock data for testing)
-        self.sources.append(self._fetch_mock_data)
     
     def _rate_limit(self):
         """Enforce rate limiting between requests"""
@@ -78,10 +75,10 @@ class DataSourceManager:
                 if sector_links:
                     data.sector = sector_links[0].get_text(strip=True)
             
-            # Extract metrics from snapshot table - improved parsing
+            # Snapshot table
             snapshot_table = soup.find("table", class_="snapshot-table2")
             if snapshot_table:
-                # Parse the table more carefully - it has multiple columns per row
+                # Parse the table
                 rows = snapshot_table.find_all("tr")
                 metrics = {}
                 
@@ -99,7 +96,7 @@ class DataSourceManager:
                             
                             # Clean up value (remove HTML formatting, extract main value)
                             if value:
-                                # Handle cases like "1.01 (0.49%)" - extract both parts
+                                # Handle cases like "1.01 (0.49%)"
                                 if '(' in value and ')' in value:
                                     # For dividend: "1.01 (0.49%)" -> store both
                                     if 'Dividend' in key:
@@ -112,7 +109,7 @@ class DataSourceManager:
                                 else:
                                     metrics[key] = value
                 
-                # Enhanced field mapping with actual Finviz field names
+                # Field mapping
                 field_mapping = {
                     # Basic valuation metrics
                     "Market Cap": "market_cap",
@@ -132,7 +129,7 @@ class DataSourceManager:
                     # Performance metrics
                     "ROA": "roa",
                     "ROE": "roe", 
-                    "ROIC": "roi",  # ROIC is closest to ROI
+                    "ROIC": "roi",
                     "Profit Margin": "profit_margin",
                     "Oper. Margin": "operating_margin",
                     
@@ -153,17 +150,6 @@ class DataSourceManager:
                     if finviz_key in metrics:
                         value = metrics[finviz_key]
                         setattr(data, data_field, value)
-                
-                # Special handling for 5-year revenue growth (if available)
-                if "Sales past 3/5Y" in metrics:
-                    # Extract 5Y growth: "2.25% 8.51%" -> "8.51%"
-                    sales_growth = metrics["Sales past 3/5Y"]
-                    parts = sales_growth.split()
-                    if len(parts) >= 2:
-                        data.revenue_growth_5y = parts[-1]  # Last part is 5Y
-                
-                # Debug: Log what was found
-                logger.debug(f"Finviz metrics for {ticker}: {list(metrics.keys())}")
             
             return data
             
@@ -176,6 +162,17 @@ class DataSourceManager:
         try:
             yf_ticker = yf.Ticker(ticker)
             info = yf_ticker.info
+            
+            # Check if we got meaningful data
+            # If Yahoo returns minimal data (just trailingPegRatio or similar), it's likely invalid
+            meaningful_fields = ['longName', 'currentPrice', 'marketCap', 'sector', 'trailingPE']
+            has_meaningful_data = any(
+                info.get(field) not in [None, 'N/A', 0] 
+                for field in meaningful_fields
+            )
+            
+            if not has_meaningful_data:
+                raise Exception(f"Ticker '{ticker}' not found - it may be invalid or delisted")
             
             data = FinancialData(ticker=ticker.upper())
             
@@ -225,34 +222,6 @@ class DataSourceManager:
             logger.error(f"Error fetching from Yahoo Finance for {ticker}: {e}")
             raise
     
-    def _fetch_mock_data(self, ticker: str) -> FinancialData:
-        """Fallback mock data for testing purposes"""
-        import random
-        
-        # Generate realistic mock data
-        sectors = ["Technology", "Healthcare", "Financial", "Consumer", "Energy", "Industrial"]
-        companies = {
-            "AAPL": "Apple Inc.",
-            "GOOGL": "Alphabet Inc.",
-            "MSFT": "Microsoft Corporation",
-            "AMZN": "Amazon.com Inc.",
-            "TSLA": "Tesla Inc.",
-        }
-        
-        return FinancialData(
-            ticker=ticker.upper(),
-            company_name=companies.get(ticker.upper(), f"Mock Company {ticker}"),
-            sector=random.choice(sectors),
-            price=f"{random.uniform(50, 300):.2f}",
-            pe_ratio=f"{random.uniform(10, 30):.1f}",
-            market_cap=f"{random.uniform(1, 100):.1f}B",
-            dividend_yield=f"{random.uniform(0, 5):.2f}%",
-            beta=f"{random.uniform(0.5, 2.0):.2f}",
-            roa=f"{random.uniform(5, 20):.1f}%",
-            roe=f"{random.uniform(10, 25):.1f}%",
-            timestamp=datetime.now().isoformat()
-        )
-    
     def fetch_data(self, ticker: str) -> FinancialData:
         """Fetch data using available sources with intelligent data fusion"""
         ticker = ticker.upper().strip()
@@ -267,25 +236,23 @@ class DataSourceManager:
                 data = source(ticker)
                 
                 if primary_data is None:
-                    # First successful source becomes primary
                     primary_data = data
                     logger.info(f"Successfully fetched {ticker} from primary source")
                 else:
-                    # Supplement primary data with missing fields from other sources
                     logger.info(f"Supplementing {ticker} data from additional source")
                     self._merge_data(primary_data, data)
-                
-                # If we have primary data and this is Yahoo Finance, always try to get balance sheet
+
                 if primary_data and hasattr(self, '_is_yahoo_source') and self._is_yahoo_source(source):
-                    continue  # Always try Yahoo for balance sheet data
+                    continue
                     
             except Exception as e:
                 logger.warning(f"Source {i+1} failed for {ticker}: {e}")
                 errors.append(str(e))
                 
         if primary_data is None:
-            logger.error(f"All sources failed for {ticker}: {errors}")
-            raise Exception(f"All sources failed for {ticker}: {'; '.join(errors)}")
+            # If all sources failed, raise a user-friendly exception
+            logger.error(f"All data sources failed for ticker {ticker}: {'; '.join(errors)}")
+            raise Exception(f"Ticker '{ticker}' not found - it may be invalid or delisted")
         
         logger.info(f"Successfully compiled data for {ticker}")
         return primary_data
@@ -296,7 +263,6 @@ class DataSourceManager:
     
     def _merge_data(self, primary: FinancialData, supplementary: FinancialData):
         """Merge supplementary data into primary data for missing fields"""
-        # List of fields to potentially supplement
         supplementary_fields = [
             'total_assets', 'total_liabilities', 'change_5y',
             'dividend_yield', 'beta', 'eps_ttm', 'pe_ratio'
@@ -305,8 +271,7 @@ class DataSourceManager:
         for field in supplementary_fields:
             primary_value = getattr(primary, field, "N/A")
             supp_value = getattr(supplementary, field, "N/A")
-            
-            # If primary doesn't have the field but supplementary does
+
             if primary_value == "N/A" and supp_value != "N/A":
                 setattr(primary, field, supp_value)
                 logger.debug(f"Supplemented {field}: {supp_value}")
@@ -322,5 +287,4 @@ class DataSourceManager:
             info.append("Finviz (web scraping)")
         if HAS_YFINANCE:
             info.append("Yahoo Finance (API)")
-        info.append("Mock data (fallback)")
         return info 

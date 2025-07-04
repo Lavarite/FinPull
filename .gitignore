@@ -102,12 +102,6 @@ venv.bak/
 dmypy.json
 
 # FinPull specific
-run_demo.py
-financial_data.json
-financial_data.json.backup
-financial_export_*.json
-financial_export_*.csv
-financial_export_*.xlsx
 *.tmp
 
 # IDE files

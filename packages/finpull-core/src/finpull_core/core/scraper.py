@@ -1,7 +1,3 @@
-"""
-Main scraper class that coordinates data fetching and storage
-"""
-
 import logging
 from typing import List, Optional
 
@@ -17,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 class FinancialDataScraper:
-    """Main application class that coordinates data operations"""
     
     def __init__(self, storage_file: str = None):
         """
@@ -44,6 +39,10 @@ class FinancialDataScraper:
         Raises:
             Exception: If data fetching fails
         """
+        # Validate ticker format first
+        if not self.validate_ticker(ticker):
+            raise ValueError(f"'{ticker}' is not a valid ticker symbol")
+        
         if self.storage.add_ticker(ticker):
             try:
                 data = self.data_source.fetch_data(ticker)

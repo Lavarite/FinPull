@@ -1,7 +1,3 @@
-"""
-Data storage and persistence functionality
-"""
-
 import json
 import os
 import csv
@@ -18,9 +14,20 @@ class DataStorage:
     """Handles data persistence"""
     
     def __init__(self, storage_file: str = None):
-        # Allow custom storage file via environment variable
         if storage_file is None:
-            storage_file = os.getenv('FINPULL_STORAGE_FILE', 'financial_data.json')
+            # Check environment override
+            env_path = os.getenv('FINPULL_STORAGE_FILE')
+            if env_path:
+                storage_file = env_path
+            else:
+                home_dir = os.path.expanduser('~')
+                default_dir = os.path.join(home_dir, '.finpull')
+                try:
+                    os.makedirs(default_dir, exist_ok=True)
+                except PermissionError:
+                    # Fallback to current directory if home directory not writable
+                    default_dir = os.getcwd()
+                storage_file = os.path.join(default_dir, 'financial_data.json')
         
         self.storage_file = storage_file
         self.data_cache: Dict[str, FinancialData] = {}
@@ -41,23 +48,30 @@ class DataStorage:
                         self.data_cache[ticker] = FinancialData.from_dict(item_data)
                         
                 logger.info(f"Loaded {len(self.tickers_list)} tickers from {self.storage_file}")
+        except PermissionError as e:
+            logger.error(f"Permission denied when reading storage file: {e}")
+            print(f"⚠️  FinPull cannot read the storage file due to permission error. Data will not be persisted. Path: {self.storage_file}")
+
+            self.data_cache = {}
+            self.tickers_list = []
         except Exception as e:
             logger.error(f"Error loading data: {e}")
-            # Initialize empty state on error
+
             self.data_cache = {}
             self.tickers_list = []
     
     def save_data(self):
         """Save data to storage file"""
         try:
+            from .. import __version__
+            
             data = {
                 'tickers': self.tickers_list,
                 'cache': {ticker: data.to_dict() for ticker, data in self.data_cache.items()},
                 'last_updated': datetime.now().isoformat(),
-                'version': '1.0.0'
+                'version': __version__
             }
-            
-            # Create backup if file exists
+
             if os.path.exists(self.storage_file):
                 backup_file = f"{self.storage_file}.backup"
                 try:
@@ -65,8 +79,7 @@ class DataStorage:
                     shutil.copy2(self.storage_file, backup_file)
                 except Exception as backup_error:
                     logger.warning(f"Could not create backup: {backup_error}")
-            
-            # Write data atomically
+
             temp_file = f"{self.storage_file}.tmp"
             with open(temp_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
@@ -75,6 +88,9 @@ class DataStorage:
             os.replace(temp_file, self.storage_file)
             logger.debug(f"Saved data to {self.storage_file}")
             
+        except PermissionError as e:
+            logger.error(f"Permission denied when writing storage file: {e}")
+            print(f"⚠️  FinPull cannot save data due to permission error. Changes will not persist. Path: {self.storage_file}")
         except Exception as e:
             logger.error(f"Error saving data: {e}")
             # Clean up temp file if it exists

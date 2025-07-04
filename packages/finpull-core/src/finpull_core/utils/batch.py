@@ -37,6 +37,8 @@ def batch_fetch_tickers(tickers: List[str]) -> List[FinancialData]:
             data = scraper.storage.get_cached_data(ticker)
             if data:
                 results.append(data)
+        except ValueError as e:
+            logger.error(f"Invalid ticker {ticker}: {e}")
         except Exception as e:
             logger.error(f"Failed to fetch {ticker}: {e}")
     

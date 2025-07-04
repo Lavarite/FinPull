@@ -1,11 +1,9 @@
-# Core dependencies
+# For web scraping (Finviz)
 requests>=2.25.1
 beautifulsoup4>=4.9.3
+
+# For Yahoo Finance data
 yfinance>=0.1.63
 
-# GUI and export functionality
+# For Excel export
 openpyxl>=3.0.7
-tkinter>=8.6; sys_platform != "win32"
-
-# Note: On Windows, tkinter is typically included with Python
-# On Linux/Mac, you may need to install: sudo apt-get install python3-tk (Ubuntu/Debian) 

@@ -1,18 +1,13 @@
-"""
-API interface for web/WASM environments and programmatic access
-"""
-
 import logging
 from typing import Dict, Any, List, Optional
 
-from ..core.scraper import FinancialDataScraper
-from ..core.data_models import FinancialData
+from .core.scraper import FinancialDataScraper
+from .core.data_models import FinancialData
 
 logger = logging.getLogger(__name__)
 
 
 class FinancialDataAPI:
-    """Simple API interface for web/WASM environments"""
     
     def __init__(self, storage_file: Optional[str] = None):
         """
@@ -48,6 +43,13 @@ class FinancialDataAPI:
                     "message": f"{ticker} already exists",
                     "ticker": ticker.upper()
                 }
+        except ValueError as e:
+            logger.error(f"API add_ticker validation error for {ticker}: {e}")
+            return {
+                "success": False, 
+                "error": f"Invalid ticker: {str(e)}",
+                "ticker": ticker.upper()
+            }
         except Exception as e:
             logger.error(f"API add_ticker error for {ticker}: {e}")
             return {
@@ -105,6 +107,68 @@ class FinancialDataAPI:
             }
         except Exception as e:
             logger.error(f"API refresh_data error: {e}")
+            return {"success": False, "error": str(e)}
+    
+    def refresh_data_with_progress(self, ticker: Optional[str] = None, progress_callback=None) -> Dict[str, Any]:
+        """
+        Refresh data for ticker(s) with progress callback
+        
+        Args:
+            ticker: Specific ticker to refresh (optional, None for all)
+            progress_callback: Function to call with progress updates (ticker, status)
+            
+        Returns:
+            Dictionary with success status and progress details
+        """
+        try:
+            if ticker:
+                # Refresh single ticker
+                if progress_callback:
+                    progress_callback(ticker, "loading")
+                
+                self.scraper.refresh_data(ticker)
+                
+                if progress_callback:
+                    progress_callback(ticker, "complete")
+                
+                return {
+                    "success": True, 
+                    "message": f"Refreshed {ticker}",
+                    "ticker": ticker.upper()
+                }
+            else:
+                # Refresh all tickers
+                ticker_list = self.scraper.get_ticker_list()
+                results = {
+                    "success": True,
+                    "total": len(ticker_list),
+                    "completed": 0,
+                    "failed": 0,
+                    "details": []
+                }
+                
+                for tk in ticker_list:
+                    try:
+                        if progress_callback:
+                            progress_callback(tk, "loading")
+                        
+                        self.scraper.refresh_data(tk)
+                        results["completed"] += 1
+                        results["details"].append({"ticker": tk, "status": "success"})
+                        
+                        if progress_callback:
+                            progress_callback(tk, "complete")
+                    except Exception as e:
+                        results["failed"] += 1
+                        results["details"].append({"ticker": tk, "status": "error", "error": str(e)})
+                        
+                        if progress_callback:
+                            progress_callback(tk, "error")
+                
+                return results
+                
+        except Exception as e:
+            logger.error(f"API refresh_data_with_progress error: {e}")
             return {"success": False, "error": str(e)}
     
     def remove_ticker(self, ticker: str) -> Dict[str, Any]:
@@ -263,6 +327,11 @@ class FinancialDataAPI:
                     results["added"].append(ticker.upper())
                 else:
                     results["already_exists"].append(ticker.upper())
+            except ValueError as e:
+                results["failed"].append({
+                    "ticker": ticker.upper(),
+                    "error": f"Invalid ticker: {str(e)}"
+                })
             except Exception as e:
                 results["failed"].append({
                     "ticker": ticker.upper(),
